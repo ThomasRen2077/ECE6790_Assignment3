@@ -6,13 +6,13 @@ Activate the installed environment:
 conda activate akida
 ```
 
-## :lock: Deploy your model down to the hardware
+## Dataset
 
 - **Dataset:** MNIST dataset with the input size = [28, 28]
 
-## :bell:What you need to do:
+## Coding
 
-**:golf: [Coding]**: Create a keras model by customizing the `model_keras`
+Create a keras model by customizing the `model_keras`
 
 ```python
 model_keras = keras.models.Sequential([
@@ -31,19 +31,7 @@ model_keras = keras.models.Sequential([
 ], 'mnistnet')
 ```
 
-**Design space:**
-
-- You can only create the model with the following layers:
-- `keras.layers.SeparableConv2D`: Depth-wise separable convolutional layer.
-- `keras.layers.Conv2D`: Convolutional layer.
-- `keras.layers.MaxPooling2D`: Max Pooling layer
-- `keras.layers.ReLU`: ReLU layer.
-  - **Important:** The ReLU must have a upper bound (e.g., `keras.layers.ReLU(max_value=6.0)`)
-- `keras.layers.BatchNormalization`: Batch normalization layer.
-
-Make sure your model meet the hardware constraint: [[Link]](https://brainchip-inc.github.io/akida_examples_2.3.0-doc-1/user_guide/hw_constraints.html)
-
-**:golf: [Coding]**: Quantize the model with the designed precision (with the default quantizer)
+Quantize the model with the designed precision (with the default quantizer)
 
 ```python
 # quantize the model (The input weight_bits is fixed = 8bit)
@@ -52,11 +40,7 @@ model_quantized = quantize(model_keras, qparams=qparams)
 model_quantized.summary()
 ```
 
-- **Design space:** quantize your model with `weight_precision` and activation `activation_bits`
-  - **Important:** The Akida library only support the low precision scheme [W4A4], [W4A1], [W2A4].
-  - **Important:** There could be some unavoidable instability when you quantize your model, please try to execute the quantization step multiple times and find the most stable version.
-
-**:golf: [Coding]**: Measure the power and latency (frame per second) by running model inference on hardware.
+Measure the power and latency (frame per second) by running model inference on hardware.
 
 - Convert the quantized model to spiking neural network
 
@@ -76,7 +60,7 @@ model_quantized.summary()
   accuracy_keras = np.sum(np.equal(preds_keras, y_test)) / y_test.shape[0]
   ```
 
-- **Deploy the model**
+- Deploy the model
 
   ```python
   model_akida.map(device)
@@ -96,45 +80,22 @@ model_quantized.summary()
 
 - The hardware performance is measured by Akida tool, which returns the latency, power, and energy consumption:
 
-  ```bash
-  Floor power: 894.26 mW
-  model akida power = Average framerate = 770.00 fps
-  Last inference power range (mW):  Avg 936.80 / Min 894.00 / Max 1023.00 / Std 59.43
-  Last inference energy consumed (mJ/frame): 1.22
-  Total memory usage of the inference 247984 Byte
-  Keras accuracy: 9672/10000.
-  ```
+## Report
 
-**:notebook: [Report and Requirement]**
-
-- My Accuracy:
+- Accuracy:
 
 ```bash
 Test accuracy after pre-training: 0.9872999787330627
 Quantized model accuracy: 9761/10000.
 ```
 
----
+- Overall Performance:
 
-:exclamation:**[Overall Performance]**
-
-- The performance of your model design is measured by the quality metric below
-
-  $$
-  Quality = (100 - \text{Hardware Accuracy})\times \text{Latency} \times (\text{Average Power}) \times \text{Model Size}
-  $$
-
-  Where hardware accuracy is the value of percentage (e.g., 96.72% = 96.72), the latency, power, and model size, should be converted in to **Second**, **Watt**, and **Byte**, respectively.
-
-  **Requirement:** To get full credit of this part, your overall quality score **should be less than 200**.
-
-  - My Performance:
-
-  ```bash
-  Floor power: 894.26 mW
-  model akida power = Average framerate = 1677.85 fps
-  LLast inference power range (mW):  Avg 895.27 / Min 894.00 / Max 907.00 / Std 2.93
-  Last inference energy consumed (mJ/frame): 0.53
-  Total memory usage of the inference 96304 Byte
-  Quantized model accuracy: 9761/10000.
-  ```
+```bash
+Floor power: 894.26 mW
+model akida power = Average framerate = 1677.85 fps
+LLast inference power range (mW):  Avg 895.27 / Min 894.00 / Max 907.00 / Std 2.93
+Last inference energy consumed (mJ/frame): 0.53
+Total memory usage of the inference 96304 Byte
+Quantized model accuracy: 9761/10000.
+```
